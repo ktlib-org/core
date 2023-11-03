@@ -43,11 +43,11 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
-    implementation("org.springframework.security:spring-security-crypto:5.7.3")
+    implementation("org.springframework.security:spring-security-crypto:6.0.2")
     implementation("com.github.f4b6a3:uuid-creator:5.3.5")
 
     compileOnly("io.kotest:kotest-runner-junit5:$kotestVersion")
-    compileOnly("io.mockk:mockk:1.12.7")
+    compileOnly("io.mockk:mockk:1.13.4")
 
     testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
     testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
