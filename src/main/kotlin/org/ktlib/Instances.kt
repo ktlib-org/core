@@ -8,11 +8,10 @@ import kotlin.reflect.full.createInstance
  */
 interface TypeFactory<T : Any> {
     companion object {
-        fun <A : Any, B : A> default(type: KClass<A>): TypeFactory<B> {
-            return object : TypeFactory<B> {
-                override fun create(): B {
-                    @Suppress("UNCHECKED_CAST")
-                    return (type.objectInstance ?: type.createInstance()) as B
+        fun <T : Any> default(type: KClass<T>): TypeFactory<T> {
+            return object : TypeFactory<T> {
+                override fun create(): T {
+                    return (type.objectInstance ?: type.createInstance())
                 }
             }
         }
