@@ -23,13 +23,12 @@ jobs:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
-      - name: Wait for tag to be available
-        uses: GuillaumeFalourd/wait-sleep-action@v1
-        with:
-          time: '60' # 60 seconds
       - name: Start Jitpack Build
         uses: fjogeleit/http-request-action@v1
         with:
           url: https://jitpack.io/com/github/ktlib-org/core/${{ steps.tag_version.outputs.new_tag }}/core-${{ steps.tag_version.outputs.new_tag }}.pom
           method: 'GET'
-          preventFailureOnNoResponse: true
+          preventFailureOnNoResponse: false
+          retry: 10
+          retryWait: 20000
+
