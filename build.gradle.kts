@@ -63,3 +63,38 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 val test by tasks.getting(Test::class) {
     useJUnitPlatform { }
 }
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "org.ktlib"
+            artifactId = "core"
+            version = "0.1.1"
+
+            from(components["java"])
+
+            pom {
+                name.set("core")
+                description.set("A library making some things easier in Kotlin")
+                url.set("http://ktlib.org")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("aaronfreeman")
+                        name.set("Aaron Freeman")
+                        email.set("aaron@freeman.zone")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git@github.com:ktlib-org/ktlib.git")
+                    url.set("https://github.com/ktlib-org/ktlib")
+                }
+            }
+        }
+    }
+}
