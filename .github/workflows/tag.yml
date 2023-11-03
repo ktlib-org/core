@@ -26,7 +26,7 @@ jobs:
   deployment:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy Stage
+      - name: Start Jitpack Build
         uses: fjogeleit/http-request-action@v1
         with:
           url: https://jitpack.io/com/github/ktlib-org/core/${{ steps.tag_version.outputs.new_tag }}/core-${{ steps.tag_version.outputs.new_tag }}.pom
