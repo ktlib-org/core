@@ -1,2 +1,2 @@
-rootProject.name = "ktlib"
+rootProject.name = "ktlib-core"
 
