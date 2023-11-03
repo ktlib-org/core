@@ -7,6 +7,7 @@ import io.mockk.unmockkAll
 import org.junit.platform.commons.annotation.Testable
 import org.ktlib.Instances
 import org.ktlib.entities.*
+import kotlin.reflect.KClass
 import kotlin.reflect.KProperty0
 
 @Testable
@@ -15,11 +16,12 @@ abstract class EntitySpec(body: EntitySpec.() -> Unit = {}) : DslDrivenSpec(), S
 
     init {
         EntityInitializer.init()
-        Instances.register(EntityStore::class, EntityStoreResolver)
+        @Suppress("UNCHECKED_CAST")
+        Instances.register(EntityStore::class) { type -> EntityStoreTypeFactory(type as KClass<EntityStore<*>>) }
 
         beforeEach {
             objectMocks.forEach { mockkObject(it) }
-            TransactionManager.runInTransaction()
+            TransactionManager.startTransaction()
         }
 
         afterEach {

@@ -8,12 +8,13 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.isSubclassOf
 
 internal object InstancesImpl : Instances {
     private val logger = KotlinLogging.logger {}
     private val typeFactories = mutableMapOf<KClass<*>, TypeFactory<*>>()
-    private val factoryResolvers = mutableMapOf<KClass<*>, FactoryResolver>()
+    private val factoryResolvers = mutableMapOf<KClass<*>, FactoryResolver<*>>()
 
     override fun isRegistered(type: KClass<*>) =
         typeFactories.containsKey(type) || checkConfig(type) || findResolver(type) != null
@@ -22,7 +23,7 @@ internal object InstancesImpl : Instances {
         when (val impl = configOrNull<KClass<*>>("instances.${type.qualifiedName!!}")) {
             null -> false
             else -> {
-                doRegister(type, TypeFactory.default(impl))
+                doRegister(type) { impl.createInstance() }
                 true
             }
         }
@@ -30,7 +31,7 @@ internal object InstancesImpl : Instances {
     private fun findResolver(type: KClass<*>) =
         factoryResolvers.keys.find { type.isSubclassOf(it) }?.let { factoryResolvers[it] }
 
-    override fun <T : Any, F : T> register(type: KClass<T>, factory: TypeFactory<F>) {
+    override fun <T : Any> register(type: KClass<T>, factory: TypeFactory<T>) {
         doRegister(type, factory)
     }
 
@@ -39,7 +40,7 @@ internal object InstancesImpl : Instances {
         typeFactories[type] = factory
     }
 
-    override fun <T : Any> register(type: KClass<T>, resolver: FactoryResolver) {
+    override fun <T : Any> register(type: KClass<T>, resolver: FactoryResolver<T>) {
         logger.debug { "Registering resolver ${resolver::class.qualifiedName} for interface ${type.qualifiedName}" }
         factoryResolvers[type] = resolver
     }

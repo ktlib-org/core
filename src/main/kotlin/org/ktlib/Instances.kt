@@ -1,30 +1,19 @@
 package org.ktlib
 
 import kotlin.reflect.KClass
-import kotlin.reflect.full.createInstance
 
 /**
  * A simple type factory that can create an instance of a type
  */
-interface TypeFactory<T : Any> {
-    companion object {
-        fun <T : Any> default(type: KClass<T>): TypeFactory<T> {
-            return object : TypeFactory<T> {
-                override fun create(): T {
-                    return (type.objectInstance ?: type.createInstance())
-                }
-            }
-        }
-    }
-
+fun interface TypeFactory<out T : Any> {
     fun create(): T
 }
 
 /**
  * A factory resolver that can supply a factory for all subclasses of a type
  */
-interface FactoryResolver {
-    fun <F : Any> resolve(type: KClass<F>): TypeFactory<F>
+fun interface FactoryResolver<F : Any> {
+    fun resolve(type: KClass<*>): TypeFactory<F>
 }
 
 /**
@@ -61,14 +50,14 @@ interface Instances {
      * @param type the type whose factory
      * @param factory a factory to use to create instances of the type
      */
-    fun <T : Any, F : T> register(type: KClass<T>, factory: TypeFactory<F>)
+    fun <T : Any> register(type: KClass<T>, factory: TypeFactory<T>)
 
     /**
      * Register a resolver for any subclass of the specified type
      * @param type the parent type to use this resolver for
      * @param resolver a factory resolver to use to create instances of the type
      */
-    fun <T : Any> register(type: KClass<T>, resolver: FactoryResolver)
+    fun <T : Any> register(type: KClass<T>, resolver: FactoryResolver<T>)
 }
 
 /**

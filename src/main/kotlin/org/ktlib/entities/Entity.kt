@@ -23,14 +23,10 @@ interface Entity {
     fun lazyEntityValues(): MutableMap<String, Any?>
 }
 
-interface EntityInitializer {
-    companion object : EntityInitializer by lookup<EntityInitializer>(EntityImplInitializer)
+fun interface EntityInitializer {
+    companion object : EntityInitializer by lookup<EntityInitializer>(EntityInitializer {})
 
     fun init()
-}
-
-internal object EntityImplInitializer : EntityInitializer {
-    override fun init() {}
 }
 
 interface EntityStore<T : Entity> {
@@ -188,13 +184,13 @@ interface TransactionManager : Closeable {
     companion object : TransactionManager by lookup<TransactionManager>(EmptyTransactionManager)
 
     fun <T> runInTransaction(func: () -> T): T
-    fun runInTransaction()
+    fun startTransaction()
     fun rollback()
 }
 
 internal object EmptyTransactionManager : TransactionManager {
     override fun <T> runInTransaction(func: () -> T): T = func()
-    override fun runInTransaction() {}
+    override fun startTransaction() {}
     override fun rollback() {}
     override fun close() {}
 }

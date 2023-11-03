@@ -1,9 +1,8 @@
 package org.ktlib.entities
 
-import org.ktlib.FactoryResolver
 import org.ktlib.TypeFactory
+import org.ktlib.newUUID7
 import org.ktlib.now
-import org.ktlib.typeArguments
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -36,7 +35,11 @@ internal class EntityImpl(private val type: KClass<*>, private val data: Mutable
         @Suppress("UNCHECKED_CAST")
         private fun <T : Any> createProxy(type: KClass<T>, data: Map<String, Any?>): T {
             val types = arrayOf(type.java, EntityMarker::class.java)
-            return Proxy.newProxyInstance(type.java.classLoader, types, EntityImpl(type, data.toMutableMap())) as T
+            val mutableData = data.toMutableMap()
+            if (!mutableData.containsKey("id")) {
+                mutableData["id"] = newUUID7()
+            }
+            return Proxy.newProxyInstance(type.java.classLoader, types, EntityImpl(type, mutableData)) as T
         }
     }
 
@@ -145,32 +148,14 @@ internal class EntityImpl(private val type: KClass<*>, private val data: Mutable
     }
 }
 
-internal object EntityStoreResolver : FactoryResolver {
-    override fun <F : Any> resolve(type: KClass<F>): TypeFactory<F> {
-        return object : TypeFactory<F> {
-            override fun create(): F {
-                return EntityStoreImpl.create(type)
-            }
-        }
-    }
+class EntityStoreTypeFactory(private val type: KClass<EntityStore<*>>) : TypeFactory<EntityStore<*>> {
+    private val types = arrayOf(type.java)
+    private val loader = type.java.classLoader
 
-    private val typeClass by lazy {
-        @Suppress("UNCHECKED_CAST")
-        typeArguments(FactoryResolver::class)[0] as KClass<EntityStore<*>>
-    }
+    override fun create() = Proxy.newProxyInstance(loader, types, EntityStoreImpl(type)) as EntityStore<*>
 }
 
-internal class EntityStoreImpl(private val type: KClass<*>) : InvocationHandler {
-    companion object {
-        fun <T : Any> create(type: KClass<T>) = createProxy(type)
-
-        @Suppress("UNCHECKED_CAST")
-        private fun <T : Any> createProxy(type: KClass<T>): T {
-            val types = arrayOf(type.java)
-            return Proxy.newProxyInstance(type.java.classLoader, types, EntityStoreImpl(type)) as T
-        }
-    }
-
+internal class EntityStoreImpl(private val type: KClass<EntityStore<*>>) : InvocationHandler {
     private val entities = mutableListOf<Entity>()
 
     override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>?): Any? {
@@ -181,6 +166,8 @@ internal class EntityStoreImpl(private val type: KClass<*>) : InvocationHandler 
             EntityStore::class -> when (method.name) {
                 "create" -> {
                     val entity = entityArg()
+                    entity.createdAt = now()
+                    entity.updatedAt = entity.createdAt
                     entities.add(entity)
                     entity
                 }
