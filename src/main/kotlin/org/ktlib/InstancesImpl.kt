@@ -30,7 +30,7 @@ internal object InstancesImpl : Instances {
     private fun findResolver(type: KClass<*>) =
         factoryResolvers.keys.find { type.isSubclassOf(it) }?.let { factoryResolvers[it] }
 
-    override fun <T : Any> register(type: KClass<T>, factory: TypeFactory<T>) {
+    override fun <T : Any, F : T> register(type: KClass<T>, factory: TypeFactory<F>) {
         doRegister(type, factory)
     }
 

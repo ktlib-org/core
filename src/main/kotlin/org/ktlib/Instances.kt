@@ -61,7 +61,7 @@ interface Instances {
      * @param type the type whose factory
      * @param factory a factory to use to create instances of the type
      */
-    fun <T : Any> register(type: KClass<T>, factory: TypeFactory<T>)
+    fun <T : Any, F : T> register(type: KClass<T>, factory: TypeFactory<F>)
 
     /**
      * Register a resolver for any subclass of the specified type
