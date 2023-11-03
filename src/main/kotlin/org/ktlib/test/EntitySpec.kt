@@ -17,7 +17,7 @@ abstract class EntitySpec(body: EntitySpec.() -> Unit = {}) : DslDrivenSpec(), S
     init {
         EntityInitializer.init()
         @Suppress("UNCHECKED_CAST")
-        Instances.register(EntityStore::class) { type -> EntityStoreTypeFactory(type as KClass<EntityStore<*>>) }
+        Instances.registerResolver(EntityStore::class) { EntityStoreTypeFactory(it as KClass<EntityStore<*>>) }
 
         beforeEach {
             objectMocks.forEach { mockkObject(it) }
