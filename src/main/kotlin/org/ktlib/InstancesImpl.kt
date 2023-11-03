@@ -22,7 +22,7 @@ internal object InstancesImpl : Instances {
         when (val impl = configOrNull<KClass<*>>("instances.${type.qualifiedName!!}")) {
             null -> false
             else -> {
-                register(type, TypeFactory.defaultFactory(impl))
+                doRegister(type, TypeFactory.default(impl))
                 true
             }
         }
@@ -31,6 +31,10 @@ internal object InstancesImpl : Instances {
         factoryResolvers.keys.find { type.isSubclassOf(it) }?.let { factoryResolvers[it] }
 
     override fun <T : Any> register(type: KClass<T>, factory: TypeFactory<T>) {
+        doRegister(type, factory)
+    }
+
+    private fun doRegister(type: KClass<*>, factory: TypeFactory<*>) {
         logger.debug { "Registering factory ${factory::class.qualifiedName} for interface ${type.qualifiedName}" }
         typeFactories[type] = factory
     }

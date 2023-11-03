@@ -2,37 +2,17 @@ package org.ktlib
 
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
-import kotlin.reflect.full.isSubclassOf
 
 /**
  * A simple type factory that can create an instance of a type
  */
 interface TypeFactory<T : Any> {
     companion object {
-        fun <T : Any> defaultFactory(type: KClass<*>): TypeFactory<T> {
-            return object : TypeFactory<T> {
-                private var instanceValidated = false
-
-                override fun create(): T {
-                    return checkInstance(type.objectInstance ?: type.createInstance())
-                }
-
-                private fun checkInstance(instance: Any): T {
-                    if (!instanceValidated) {
-                        synchronized(this) {
-                            if (!instance::class.isSubclassOf(typeClass)) {
-                                throw RuntimeException("The factory ${this::class.qualifiedName} returned a instance of type ${instance::class.qualifiedName} which is not a subclass of ${typeClass.qualifiedName}")
-                            }
-                            instanceValidated = true
-                        }
-                    }
+        fun <A : Any, B : A> default(type: KClass<A>): TypeFactory<B> {
+            return object : TypeFactory<B> {
+                override fun create(): B {
                     @Suppress("UNCHECKED_CAST")
-                    return instance as T
-                }
-
-                private val typeClass by lazy {
-                    @Suppress("UNCHECKED_CAST")
-                    typeArguments(TypeFactory::class)[0] as KClass<T>
+                    return (type.objectInstance ?: type.createInstance()) as B
                 }
             }
         }
