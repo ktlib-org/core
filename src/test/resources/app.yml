@@ -1,0 +1,22 @@
+applicationName: testing
+
+anInt: 5
+aString: "string value here"
+aLong: 4904509409509458
+aBoolean: true
+aDouble: 78.33
+
+nested:
+  stringValue: Here
+
+aNumberList:
+  - 1
+  - 4
+  - 7
+
+aStringList:
+  - a
+  - b
+  - c
+
+overrideInSecret: NotOverridden
