@@ -14,10 +14,18 @@ import kotlin.reflect.KProperty0
 abstract class EntitySpec(body: EntitySpec.() -> Unit = {}) : DslDrivenSpec(), StringSpecRootScope {
     private val objectMocks = mutableListOf<Any>()
 
+    companion object {
+        fun useTestEntityStores() {
+            EntityInitializer.init()
+            if (!Instances.isRegistered(EntityStore::class)) {
+                @Suppress("UNCHECKED_CAST")
+                Instances.registerResolver(EntityStore::class) { EntityStoreTypeFactory(it as KClass<EntityStore<*>>) }
+            }
+        }
+    }
+
     init {
-        EntityInitializer.init()
-        @Suppress("UNCHECKED_CAST")
-        Instances.registerResolver(EntityStore::class) { EntityStoreTypeFactory(it as KClass<EntityStore<*>>) }
+        useTestEntityStores()
 
         beforeEach {
             objectMocks.forEach { mockkObject(it) }
