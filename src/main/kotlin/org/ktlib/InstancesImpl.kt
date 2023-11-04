@@ -15,6 +15,7 @@ internal object InstancesImpl : Instances {
     private val logger = KotlinLogging.logger {}
     private val typeFactories = mutableMapOf<KClass<*>, TypeFactory>()
     private val factoryResolvers = mutableMapOf<KClass<*>, FactoryResolver>()
+    private val factoryResolverByType = mutableMapOf<KClass<*>, FactoryResolver>()
 
     override fun isRegistered(type: KClass<*>) =
         typeFactories.containsKey(type) || checkConfig(type) || findResolver(type) != null
@@ -29,7 +30,8 @@ internal object InstancesImpl : Instances {
         }
 
     private fun findResolver(type: KClass<*>) =
-        factoryResolvers.keys.find { type.isSubclassOf(it) }?.let { factoryResolvers[it] }
+        factoryResolverByType[type] ?: factoryResolvers.keys.find { type.isSubclassOf(it) }
+            ?.let { factoryResolvers[it]!! }?.also { factoryResolverByType[type] = it }
 
     override fun registerFactory(type: KClass<*>, factory: TypeFactory) {
         doRegister(type, factory)
