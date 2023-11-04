@@ -22,7 +22,7 @@ object EntityImplCreator : EntityCreator {
 
 interface EntityMarker {
     fun setProperty(property: KProperty<Any?>, value: Any?)
-    fun copy(): Entity
+    fun copyEntity(): Entity
 }
 
 internal class EntityImpl(private val type: KClass<*>, private val data: MutableMap<String, Any?> = mutableMapOf()) :
@@ -66,7 +66,7 @@ internal class EntityImpl(private val type: KClass<*>, private val data: Mutable
                     null
                 }
 
-                "copy" -> {
+                "copyEntity" -> {
                     create(type, data)
                 }
 
@@ -159,7 +159,7 @@ internal class EntityStoreImpl(private val type: KClass<EntityStore<*>>) : Invoc
     private val entities = mutableListOf<Entity>()
 
     override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>?): Any? {
-        fun Entity.copy() = (this as EntityMarker).copy()
+        fun Entity.copy() = (this as EntityMarker).copyEntity()
         val entityArg = { (args!![0] as Entity).copy() }
 
         return when (method?.declaringClass?.kotlin) {
