@@ -148,7 +148,7 @@ internal class EntityImpl(private val type: KClass<*>, private val data: Mutable
     }
 }
 
-class EntityStoreTypeFactory(private val type: KClass<EntityStore<*>>) : TypeFactory<EntityStore<*>> {
+class EntityStoreTypeFactory(private val type: KClass<EntityStore<*>>) : TypeFactory {
     private val types = arrayOf(type.java)
     private val loader = type.java.classLoader
 

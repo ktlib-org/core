@@ -13,8 +13,8 @@ import kotlin.reflect.full.isSubclassOf
 
 internal object InstancesImpl : Instances {
     private val logger = KotlinLogging.logger {}
-    private val typeFactories = mutableMapOf<KClass<*>, TypeFactory<*>>()
-    private val factoryResolvers = mutableMapOf<KClass<*>, FactoryResolver<*>>()
+    private val typeFactories = mutableMapOf<KClass<*>, TypeFactory>()
+    private val factoryResolvers = mutableMapOf<KClass<*>, FactoryResolver>()
 
     override fun isRegistered(type: KClass<*>) =
         typeFactories.containsKey(type) || checkConfig(type) || findResolver(type) != null
@@ -31,16 +31,16 @@ internal object InstancesImpl : Instances {
     private fun findResolver(type: KClass<*>) =
         factoryResolvers.keys.find { type.isSubclassOf(it) }?.let { factoryResolvers[it] }
 
-    override fun <T : Any> registerFactory(type: KClass<T>, factory: TypeFactory<T>) {
+    override fun registerFactory(type: KClass<*>, factory: TypeFactory) {
         doRegister(type, factory)
     }
 
-    private fun doRegister(type: KClass<*>, factory: TypeFactory<*>) {
+    private fun doRegister(type: KClass<*>, factory: TypeFactory) {
         logger.debug { "Registering factory ${factory::class.qualifiedName} for interface ${type.qualifiedName}" }
         typeFactories[type] = factory
     }
 
-    override fun <T : Any> registerResolver(type: KClass<T>, resolver: FactoryResolver<T>) {
+    override fun registerResolver(type: KClass<*>, resolver: FactoryResolver) {
         logger.debug { "Registering resolver ${resolver::class.qualifiedName} for interface ${type.qualifiedName}" }
         factoryResolvers[type] = resolver
     }
