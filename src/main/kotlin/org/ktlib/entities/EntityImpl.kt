@@ -162,7 +162,7 @@ internal class InMemoryStore(private val type: KClass<EntityStore<*>>) : Invocat
 
     private val entities = mutableListOf<Entity>()
 
-    override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>?): Any? {
+    override fun invoke(proxy: Any?, method: Method?, args: Array<out Any?>?): Any? {
         fun Entity.copy() = (this as EntityMarker).copyEntity()
         val entityArg = { (args!![0] as Entity).copy() }
 
@@ -222,11 +222,8 @@ internal class InMemoryStore(private val type: KClass<EntityStore<*>>) : Invocat
             } catch (e: InvocationTargetException) {
                 throw e.targetException
             } catch (e: NoSuchMethodException) {
-                throw IllegalStateException(
-                    "No mock supplied for ${type.qualifiedName}.${method?.name}(${
-                        args?.toList()?.map { it::class.simpleName }?.joinToString(",")
-                    })"
-                )
+                val argList = args?.toList()?.map { if (it == null) null else it::class.simpleName }?.joinToString(",")
+                throw IllegalStateException("No mock supplied for ${type.qualifiedName}.${method?.name}($argList)")
             }
         }
     }
