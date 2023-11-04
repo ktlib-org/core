@@ -23,7 +23,7 @@ internal object InstancesImpl : Instances {
         when (val impl = configOrNull<KClass<*>>("instances.${type.qualifiedName!!}")) {
             null -> false
             else -> {
-                doRegister(type) { impl.createInstance() }
+                doRegister(type) { impl.objectInstance ?: impl.createInstance() }
                 true
             }
         }
