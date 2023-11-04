@@ -48,6 +48,8 @@ dependencies {
 
     compileOnly("io.kotest:kotest-runner-junit5:$kotestVersion")
     compileOnly("io.mockk:mockk:1.13.4")
+    compileOnly("io.sentry:sentry-servlet:6.16.0")
+    compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
 
     testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
     testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")

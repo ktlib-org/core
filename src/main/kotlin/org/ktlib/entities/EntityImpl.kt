@@ -152,10 +152,10 @@ class EntityStoreTypeFactory(private val type: KClass<EntityStore<*>>) : TypeFac
     private val types = arrayOf(type.java)
     private val loader = type.java.classLoader
 
-    override fun create() = Proxy.newProxyInstance(loader, types, EntityStoreImpl(type)) as EntityStore<*>
+    override fun create() = Proxy.newProxyInstance(loader, types, InMemoryStore(type)) as EntityStore<*>
 }
 
-internal class EntityStoreImpl(private val type: KClass<EntityStore<*>>) : InvocationHandler {
+internal class InMemoryStore(private val type: KClass<EntityStore<*>>) : InvocationHandler {
     private val entities = mutableListOf<Entity>()
 
     override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>?): Any? {
