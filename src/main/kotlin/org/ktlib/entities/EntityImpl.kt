@@ -156,6 +156,10 @@ class EntityStoreTypeFactory(private val type: KClass<EntityStore<*>>) : TypeFac
 }
 
 internal class InMemoryStore(private val type: KClass<EntityStore<*>>) : InvocationHandler {
+    companion object {
+        private val methodResolution = Collections.synchronizedMap(WeakHashMap<Method, Method>())
+    }
+
     private val entities = mutableListOf<Entity>()
 
     override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>?): Any? {
@@ -213,11 +217,23 @@ internal class InMemoryStore(private val type: KClass<EntityStore<*>>) : Invocat
                 else -> throw IllegalArgumentException("Unknown method ${method.name}")
             }
 
-            else -> throw IllegalStateException(
-                "No mock supplied for ${type.qualifiedName}.${method?.name}(${
-                    args?.toList()?.map { it::class.simpleName }?.joinToString(",")
-                })"
-            )
+            else -> try {
+                method?.resolve()?.invoke(null, proxy, *(args ?: emptyArray()))
+            } catch (e: InvocationTargetException) {
+                throw e.targetException
+            } catch (e: NoSuchMethodException) {
+                throw IllegalStateException(
+                    "No mock supplied for ${type.qualifiedName}.${method?.name}(${
+                        args?.toList()?.map { it::class.simpleName }?.joinToString(",")
+                    })"
+                )
+            }
         }
+    }
+
+    private fun Method.resolve() = methodResolution.computeIfAbsent(this) {
+        val implName = "${it.declaringClass.name}\$DefaultImpls"
+        val implClass = Class.forName(implName, true, it.declaringClass.classLoader)
+        implClass.getMethod(it.name, it.declaringClass, *it.parameterTypes)
     }
 }

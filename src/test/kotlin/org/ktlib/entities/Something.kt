@@ -43,7 +43,10 @@ data class SomethingInfo(
 object Somethings : SomethingStore by lookup()
 
 interface SomethingStore : EntityStore<Something> {
-    fun create(name: String): Something
     fun findByLotsOfThings(name: String, count: Int, date: LocalDateTime): List<Something>
+
+    fun create(name: String) = Something {
+        this.name = name
+    }.create()
 }
 

@@ -125,17 +125,23 @@ class EntityTests : EntitySpec({
         items.first().something.name shouldBe "FirstValue"
     }
 
-    "cannot call new repo method without mocking" {
+    "cannot call unimplemented repo method without mocking" {
         shouldThrow<IllegalStateException> {
             Somethings.findByLotsOfThings("blah", 2, now())
         }
     }
 
-    "can mock new repo method" {
-        every { Somethings.create(any()) } returns Something { name = "mocked" }
+    "can mock unimplemented repo method" {
+        every { Somethings.findByLotsOfThings(any(), any(), any()) } returns listOf(Something { name = "mocked" })
 
-        val a = Somethings.create("anything")
+        val a = Somethings.findByLotsOfThings("anything", 1, now())
 
-        a.name shouldBe "mocked"
+        a.first().name shouldBe "mocked"
+    }
+
+    "can call new repo method with default implementation" {
+        val a = Somethings.create("hello")
+
+        a.name shouldBe "hello"
     }
 })
