@@ -47,19 +47,5 @@ abstract class EntitySpec(body: EntitySpec.() -> Unit = {}) : DslDrivenSpec(), S
         objectMocks.addAll(objects.toList())
     }
 
-    fun <T : Entity> T.set(v: Pair<KProperty0<Any?>, Any?>): T {
-        val (prop, pairValue) = v
-
-        val value = when {
-            pairValue is Int && prop.returnType.classifier == Long::class -> pairValue.toLong()
-            else -> pairValue
-        }
-
-        when (this) {
-            is EntityMarker -> this.setProperty(prop, value)
-            else -> throw IllegalStateException("Cannot use set on class ${this::class}")
-        }
-
-        return this
-    }
+    fun <T : Entity, P> T.set(v: Pair<KProperty0<P>, P>) = forceSetEntityProperty(this, v)
 }

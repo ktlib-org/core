@@ -23,6 +23,7 @@ interface Something : Entity {
     var dateTime: LocalDateTime
     var enum: MyEnum
     var long: Long?
+    val immutalbe: Long?
 
     fun validate() = validate {
         field(Something::name) { notBlank() }
@@ -47,6 +48,6 @@ interface SomethingStore : EntityStore<Something> {
 
     fun create(name: String) = Something {
         this.name = name
+        set(this::long to 5)
     }.create()
 }
-

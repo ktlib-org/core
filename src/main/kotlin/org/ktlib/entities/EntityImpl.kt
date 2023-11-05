@@ -214,18 +214,22 @@ internal class InMemoryStore(private val type: KClass<EntityStore<*>>) : Invocat
                     entities.filter { ids.contains(it.id) }.map { it.copy() }
                 }
 
+                "set" -> callMethod(proxy, method, args)
+
                 else -> throw IllegalArgumentException("Unknown method ${method.name}")
             }
 
-            else -> try {
-                method?.resolve()?.invoke(null, proxy, *(args ?: emptyArray()))
-            } catch (e: InvocationTargetException) {
-                throw e.targetException
-            } catch (e: NoSuchMethodException) {
-                val argList = args?.toList()?.map { if (it == null) null else it::class.simpleName }?.joinToString(",")
-                throw IllegalStateException("No mock supplied for ${type.qualifiedName}.${method?.name}($argList)")
-            }
+            else -> callMethod(proxy, method, args)
         }
+    }
+
+    private fun callMethod(proxy: Any?, method: Method?, args: Array<out Any?>?) = try {
+        method?.resolve()?.invoke(null, proxy, *(args ?: emptyArray()))
+    } catch (e: InvocationTargetException) {
+        throw e.targetException
+    } catch (e: NoSuchMethodException) {
+        val argList = args?.toList()?.map { if (it == null) null else it::class.simpleName }?.joinToString(",")
+        throw IllegalStateException("No mock supplied for ${type.qualifiedName}.${method?.name}($argList)")
     }
 
     private fun Method.resolve() = methodResolution.computeIfAbsent(this) {

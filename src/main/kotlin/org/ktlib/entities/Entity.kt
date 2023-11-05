@@ -10,6 +10,7 @@ import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty0
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.staticFunctions
@@ -69,6 +70,31 @@ interface EntityStore<T : Entity> {
      * Find entities by their ids.
      */
     fun findByIds(ids: Collection<UUID>): List<T>
+
+
+    fun <T : Entity, P> T.set(v: Pair<KProperty0<P>, P>) = forceSetEntityProperty(this, v)
+}
+
+internal fun <T : Entity> forceSetEntityProperty(entity: T, v: Pair<KProperty0<Any?>, Any?>): T {
+    val (prop, pairValue) = v
+
+    val value = when {
+        pairValue is Int && prop.returnType.classifier == Long::class -> pairValue.toLong()
+        else -> pairValue
+    }
+
+    if (!prop.returnType.isMarkedNullable && value == null) {
+        throw IllegalArgumentException("Cannot set null value on non-nullable property ${prop.name}")
+    } else if (value != null && prop.returnType.classifier != value::class) {
+        throw IllegalArgumentException("Cannot set value of type ${value::class} on property ${prop.name} of type ${prop.returnType.classifier}")
+    }
+
+    when (entity) {
+        is EntityMarker -> entity.setProperty(prop, value)
+        else -> throw IllegalStateException("Cannot use set on class ${entity::class}")
+    }
+
+    return entity
 }
 
 fun List<Entity>.ids() = this.map { it.id }
