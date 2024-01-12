@@ -59,6 +59,9 @@ object Environment : Init() {
         isNotLocal = !isLocal
         isNotTest = !isTest
 
-        Config.valueOrNull("bootstrap", Bootstrap::class)?.init()
+        Config.valueOrNull("bootstrap", Bootstrap::class)?.apply {
+            logger.info { "Running bootstrap: ${this::class.qualifiedName}" }
+            init()
+        }
     }
 }
