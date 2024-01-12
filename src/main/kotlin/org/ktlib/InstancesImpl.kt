@@ -8,7 +8,6 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 import kotlin.reflect.KClass
-import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.isSubclassOf
 
 internal object InstancesImpl : Instances {
@@ -17,21 +16,15 @@ internal object InstancesImpl : Instances {
     private val factoryResolvers = mutableMapOf<KClass<*>, FactoryResolver>()
     private val factoryResolverByType = mutableMapOf<KClass<*>, FactoryResolver>()
 
-    override fun isRegistered(type: KClass<*>) =
-        typeFactories.containsKey(type) || checkConfig(type) || findResolver(type) != null
+    override fun isRegistered(type: KClass<*>): Boolean {
+        return typeFactories.containsKey(type) || findResolver(type) != null
+    }
 
-    private fun checkConfig(type: KClass<*>) =
-        when (val impl = configOrNull<KClass<*>>("instances.${type.qualifiedName!!}")) {
-            null -> false
-            else -> {
-                doRegister(type) { impl.objectInstance ?: impl.createInstance() }
-                true
-            }
-        }
-
-    private fun findResolver(type: KClass<*>) =
-        factoryResolverByType[type] ?: factoryResolvers.keys.find { type.isSubclassOf(it) }
-            ?.let { factoryResolvers[it]!! }?.also { factoryResolverByType[type] = it }
+    private fun findResolver(type: KClass<*>): FactoryResolver? {
+        return factoryResolverByType[type] ?: factoryResolvers.keys.find { type.isSubclassOf(it) }
+            ?.let { factoryResolvers[it] }
+            ?.also { factoryResolverByType[type] = it }
+    }
 
     override fun registerFactory(type: KClass<*>, factory: TypeFactory) {
         doRegister(type, factory)

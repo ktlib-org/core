@@ -1,4 +1,5 @@
 applicationName: testing
+bootstrap: org.ktlib.BootstrapImpl
 
 anInt: 5
 aString: "string value here"

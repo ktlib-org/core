@@ -170,7 +170,7 @@ abstract class ConfigSource {
                 if (clazz.isSubclassOf(type)) {
                     clazz.objectInstance ?: clazz.createInstance()
                 } else {
-                    error("Config value $key has  value of class $clazz, but it is not a subclass of $type")
+                    error("Config value $key has value of class $clazz, but it is not a subclass of $type")
                 }
             } catch (e: Exception) {
                 null

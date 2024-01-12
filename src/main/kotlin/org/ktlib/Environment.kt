@@ -17,12 +17,19 @@ import io.github.oshai.kotlinlogging.KotlinLogging
  *
  * - If an environment variable named APP_VERSION or 'version' file exists on the root of the classpath it's contents
  * will be set as the version on the environment.
+ *
+ * - You can provide a config variable called 'bootstrap' which is a class name of a class you want to be called once
+ * to initialize the system.
  */
 object Environment : Init() {
     val name: String = System.getProperty("environment") ?: System.getenv("ENVIRONMENT") ?: "local"
     val version: String?
     val isLocal: Boolean
     val isProd: Boolean
+    val isTest: Boolean
+    val isNotLocal: Boolean
+    val isNotProd: Boolean
+    val isNotTest: Boolean
 
     init {
         System.setProperty("environment", name)
@@ -46,8 +53,12 @@ object Environment : Init() {
 
         isLocal = name == "local"
         isProd = name == "prod"
-    }
+        isTest = name == "test"
 
-    val isNotLocal = !isLocal
-    val isNotProd = !isProd
+        isNotProd = !isProd
+        isNotLocal = !isLocal
+        isNotTest = !isTest
+
+        Config.valueOrNull("bootstrap", Bootstrap::class)?.init()
+    }
 }

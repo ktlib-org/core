@@ -24,12 +24,6 @@ interface Entity {
     fun lazyEntityValues(): MutableMap<String, Any?>
 }
 
-fun interface EntityInitializer {
-    companion object : EntityInitializer by lookup<EntityInitializer>(EntityInitializer {})
-
-    fun init()
-}
-
 interface EntityStore<T : Entity> {
     /**
      * Create a copy of this entity.

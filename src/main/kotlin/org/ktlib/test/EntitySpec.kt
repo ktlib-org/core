@@ -16,7 +16,6 @@ abstract class EntitySpec(body: EntitySpec.() -> Unit = {}) : DslDrivenSpec(), S
 
     companion object {
         fun useTestEntityStores() {
-            EntityInitializer.init()
             if (!Instances.isRegistered(EntityStore::class)) {
                 @Suppress("UNCHECKED_CAST")
                 Instances.registerResolver(EntityStore::class) { EntityStoreTypeFactory(it as KClass<EntityStore<*>>) }
