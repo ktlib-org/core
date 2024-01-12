@@ -70,3 +70,8 @@ inline fun <reified T : Any> lookup() = Instances.instance(T::class)
  */
 inline fun <reified T : Any> lookup(default: T) =
     if (Instances.isRegistered(T::class)) Instances.instance(T::class) else default
+
+/**
+ * Allows you to register a factory for a type
+ */
+inline fun <reified T : Any> register(factory: TypeFactory) = Instances.registerFactory(T::class, factory)
