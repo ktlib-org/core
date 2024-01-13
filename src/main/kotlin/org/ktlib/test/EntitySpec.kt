@@ -15,16 +15,16 @@ abstract class EntitySpec(body: EntitySpec.() -> Unit = {}) : DslDrivenSpec(), S
     private val objectMocks = mutableListOf<Any>()
 
     companion object {
-        fun useTestEntityStores() {
-            if (!Instances.isRegistered(EntityStore::class)) {
+        fun useTestEntityRepository() {
+            if (!Instances.isRegistered(Repository::class)) {
                 @Suppress("UNCHECKED_CAST")
-                Instances.registerResolver(EntityStore::class) { EntityStoreTypeFactory(it as KClass<EntityStore<*>>) }
+                Instances.registerResolver(Repository::class) { RepositoryTypeFactory(it as KClass<Repository<*>>) }
             }
         }
     }
 
     init {
-        useTestEntityStores()
+        useTestEntityRepository()
 
         beforeEach {
             objectMocks.forEach { mockkObject(it) }

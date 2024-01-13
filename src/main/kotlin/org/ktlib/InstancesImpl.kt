@@ -2,7 +2,7 @@ package org.ktlib
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.ktlib.entities.Entity
-import org.ktlib.entities.EntityStore
+import org.ktlib.entities.Repository
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -65,7 +65,7 @@ internal object InstancesImpl : Instances {
                 var message = "No factory found when trying to invoke ${type.qualifiedName}.${method?.name}()"
                 if (e.stackTraceToString().contains("io.mockk.")) {
                     message += ".\nThis might be because you forgot to mock the '${method?.name}' method!"
-                } else if (e.type.isSubclassOf(EntityStore::class) || e.type.isSubclassOf(Entity::class)) {
+                } else if (e.type.isSubclassOf(Repository::class) || e.type.isSubclassOf(Entity::class)) {
                     message += ".\nHave you initialized the Entity classes by calling EntityInitializer.init()?"
                 }
                 throw NoInstanceException(e.type, message)

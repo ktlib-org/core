@@ -44,6 +44,6 @@ fun List<SomethingElse>.preloadSomethings() = preloadLazyList(
     { Somethings.findByIds(map { it.somethingId }) },
     { one, many -> many.filter { it.id == one.somethingId } })
 
-object SomethingElses : SomethingElseStore by lookup()
+object SomethingElses : SomethingElseRepository by lookup()
 
-interface SomethingElseStore : EntityStore<SomethingElse>
+interface SomethingElseRepository : Repository<SomethingElse>

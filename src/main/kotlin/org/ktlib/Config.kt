@@ -107,7 +107,10 @@ inline fun <reified T : Any> lazyConfigList(key: String, default: List<T>): Lazy
     lazy { configList(key, default) }
 
 /**
- * A wrapper around a list of ConfigSource objects that will be searched for config properties
+ * A wrapper around a list of ConfigSource objects that will be searched for config properties.
+ *
+ * - You can provide a config variable called 'bootstrap' which is a class name of a class you want to be called once
+ * to initialize the system.
  */
 object Config : ConfigSource() {
     private val logger = KotlinLogging.logger {}
@@ -118,7 +121,14 @@ object Config : ConfigSource() {
         addYaml("secret.yml")
         addYaml("app-${Environment.name}.yml")
         addYaml("app.yml")
+
+        Config.valueOrNull("bootstrap", Bootstrap::class)?.apply {
+            logger.info { "Running bootstrap: ${this::class.qualifiedName}" }
+            init()
+        }
     }
+
+    fun init() = Unit
 
     private fun addYaml(path: String) {
         if (path.resourceExists()) {

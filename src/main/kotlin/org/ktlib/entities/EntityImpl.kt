@@ -148,14 +148,14 @@ internal class EntityImpl(private val type: KClass<*>, private val data: Mutable
     }
 }
 
-class EntityStoreTypeFactory(private val type: KClass<EntityStore<*>>) : TypeFactory {
+class RepositoryTypeFactory(private val type: KClass<Repository<*>>) : TypeFactory {
     private val types = arrayOf(type.java)
     private val loader = type.java.classLoader
 
-    override fun create() = Proxy.newProxyInstance(loader, types, InMemoryStore(type)) as EntityStore<*>
+    override fun create() = Proxy.newProxyInstance(loader, types, InMemoryRepository(type)) as Repository<*>
 }
 
-internal class InMemoryStore(private val type: KClass<EntityStore<*>>) : InvocationHandler {
+internal class InMemoryRepository(private val type: KClass<Repository<*>>) : InvocationHandler {
     companion object {
         private val methodResolution = Collections.synchronizedMap(WeakHashMap<Method, Method>())
     }
@@ -167,7 +167,7 @@ internal class InMemoryStore(private val type: KClass<EntityStore<*>>) : Invocat
         val entityArg = { (args!![0] as Entity).copy() }
 
         return when (method?.declaringClass?.kotlin) {
-            EntityStore::class -> when (method.name) {
+            Repository::class -> when (method.name) {
                 "create" -> {
                     val entity = entityArg()
                     entity.createdAt = now()

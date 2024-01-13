@@ -24,34 +24,34 @@ interface Entity {
     fun lazyEntityValues(): MutableMap<String, Any?>
 }
 
-interface EntityStore<T : Entity> {
+interface Repository<T : Entity> {
     /**
      * Create a copy of this entity.
      */
     fun T.copy(): T
 
     /**
-     * Create entity in the store.
+     * Create entity in the repository.
      */
     fun T.create(): T
 
     /**
-     * Update entity in the store.
+     * Update entity in the repository.
      */
     fun T.update(): T
 
     /**
-     * Delete entity from the store.
+     * Delete entity from the repository.
      */
     fun T.delete(): T
 
     /**
-     * Returns all instances of an entity in the store.
+     * Returns all instances of an entity in the repository.
      */
     fun all(): List<T>
 
     /**
-     * Delete all entities from the store.
+     * Delete all entities from the repository.
      */
     fun List<T>.deleteAll(): List<T>
 

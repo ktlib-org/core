@@ -41,9 +41,9 @@ data class SomethingInfo(
     var long: Long?
 )
 
-object Somethings : SomethingStore by lookup()
+object Somethings : SomethingRepository by lookup()
 
-interface SomethingStore : EntityStore<Something> {
+interface SomethingRepository : Repository<Something> {
     fun findByLotsOfThings(name: String, count: Int, date: LocalDateTime): List<Something>
 
     fun create(name: String) = Something {
