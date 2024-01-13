@@ -31,12 +31,18 @@ internal object InstancesImpl : Instances {
     }
 
     private fun doRegister(type: KClass<*>, factory: TypeFactory) {
-        logger.debug { "Registering factory ${factory::class.qualifiedName} for interface ${type.qualifiedName}" }
+        logger.debug { "Registering factory ${typeName(factory::class.qualifiedName)}for interface ${type.qualifiedName}" }
         typeFactories[type] = factory
     }
 
+    private fun typeName(name: String?) = when {
+        name == null -> ""
+        name.contains("\$\$Lambda\$") -> "${name.substringBefore("$$")}.Lambda "
+        else -> "$name "
+    }
+
     override fun registerResolver(type: KClass<*>, resolver: FactoryResolver) {
-        logger.debug { "Registering resolver ${resolver::class.qualifiedName} for interface ${type.qualifiedName}" }
+        logger.debug { "Registering resolver ${typeName(resolver::class.qualifiedName)}for interface ${type.qualifiedName}" }
         factoryResolvers[type] = resolver
     }
 
