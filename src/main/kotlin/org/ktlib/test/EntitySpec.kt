@@ -5,6 +5,7 @@ import io.kotest.core.spec.style.scopes.StringSpecRootScope
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import org.junit.platform.commons.annotation.Testable
+import org.ktlib.BootstrapRunner
 import org.ktlib.Instances
 import org.ktlib.entities.*
 import kotlin.reflect.KClass
@@ -14,17 +15,13 @@ import kotlin.reflect.KProperty0
 abstract class EntitySpec(body: EntitySpec.() -> Unit = {}) : DslDrivenSpec(), StringSpecRootScope {
     private val objectMocks = mutableListOf<Any>()
 
-    companion object {
-        fun useTestEntityRepository() {
-            if (!Instances.isRegistered(Repository::class)) {
-                @Suppress("UNCHECKED_CAST")
-                Instances.registerResolver(Repository::class) { RepositoryTypeFactory(it as KClass<Repository<*>>) }
-            }
-        }
-    }
-
     init {
-        useTestEntityRepository()
+        BootstrapRunner.init()
+
+        if (!Instances.isRegistered(Repository::class)) {
+            @Suppress("UNCHECKED_CAST")
+            Instances.registerResolver(Repository::class) { RepositoryTypeFactory(it as KClass<Repository<*>>) }
+        }
 
         beforeEach {
             objectMocks.forEach { mockkObject(it) }

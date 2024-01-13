@@ -1,9 +1,9 @@
 package org.ktlib
 
 import io.kotest.matchers.shouldBe
-import org.ktlib.test.ObjectMockSpec
+import org.ktlib.test.StringSpec
 
-class ConfigTests : ObjectMockSpec({
+class ConfigTests : StringSpec({
     objectMocks(Config::class)
 
     "Int config" {

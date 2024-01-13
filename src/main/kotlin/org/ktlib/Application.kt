@@ -21,6 +21,7 @@ object Application {
 
     init {
         Environment.init()
+        BootstrapRunner.init()
 
         name = config("applicationName")
     }

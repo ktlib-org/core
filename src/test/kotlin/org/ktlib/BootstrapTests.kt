@@ -5,7 +5,7 @@ import io.kotest.matchers.shouldBe
 
 class BootstrapTests : StringSpec({
     "boostrap called" {
-        Config.init()
+        BootstrapRunner.init()
         System.getProperty("boostrap-called") shouldBe "true"
     }
 })

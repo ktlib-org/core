@@ -113,19 +113,15 @@ inline fun <reified T : Any> lazyConfigList(key: String, default: List<T>): Lazy
  * to initialize the system.
  */
 object Config : ConfigSource() {
-    private val logger = KotlinLogging.logger {}
+    private val logger by lazy { KotlinLogging.logger {} }
     private val configs = mutableListOf<ConfigSource>()
 
     init {
+        Environment.init()
         addSource(SystemPropertyConfig)
         addYaml("secret.yml")
         addYaml("app-${Environment.name}.yml")
         addYaml("app.yml")
-
-        Config.valueOrNull("bootstrap", Bootstrap::class)?.apply {
-            logger.info { "Running bootstrap: ${this::class.qualifiedName}" }
-            init()
-        }
     }
 
     fun init() = Unit
