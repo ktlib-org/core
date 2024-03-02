@@ -74,8 +74,7 @@ inline fun <reified T : Any> lookup(default: T) =
 /**
  * Allows you to register a factory for a type
  */
-inline fun <reified T : Any> register(crossinline factory: () -> T) =
-    Instances.registerFactory(T::class) { factory() }
+inline fun <reified T : Any> register(crossinline factory: () -> T) = Instances.registerFactory(T::class) { factory() }
 
 /**
  * Allows you to register an instance for a type
