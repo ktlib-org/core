@@ -148,11 +148,10 @@ internal class EntityImpl(private val type: KClass<*>, private val data: Mutable
     }
 }
 
-class RepositoryTypeFactory(private val type: KClass<Repository<*>>) : TypeFactory {
-    private val types = arrayOf(type.java)
-    private val loader = type.java.classLoader
-
-    override fun create() = Proxy.newProxyInstance(loader, types, InMemoryRepository(type)) as Repository<*>
+fun createRepositoryTypeFactory(type: KClass<Repository<*>>): TypeFactory {
+    return {
+        Proxy.newProxyInstance(type.java.classLoader, arrayOf(type.java), InMemoryRepository(type)) as Repository<*>
+    }
 }
 
 internal class InMemoryRepository(private val type: KClass<Repository<*>>) : InvocationHandler {

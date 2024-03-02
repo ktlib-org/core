@@ -84,7 +84,7 @@ internal object InstancesImpl : Instances {
         if (!isRegistered(type)) {
             throw NoInstanceException(type)
         }
-        val factory = typeFactories[type] ?: findResolver(type)!!.resolve(type)
-        return factory.create() as T
+        val factory = typeFactories[type] ?: findResolver(type)!!(type)
+        return factory() as T
     }
 }

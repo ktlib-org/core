@@ -5,16 +5,12 @@ import kotlin.reflect.KClass
 /**
  * A simple type factory that can create an instance of a type
  */
-fun interface TypeFactory {
-    fun create(): Any
-}
+typealias TypeFactory = () -> Any
 
 /**
  * A factory resolver that can supply a factory for all subclasses of a type
  */
-fun interface FactoryResolver {
-    fun resolve(type: KClass<*>): TypeFactory
-}
+typealias FactoryResolver = (type: KClass<*>) -> TypeFactory
 
 /**
  * An exception thrown when no instance is registered for a requested type
@@ -74,9 +70,4 @@ inline fun <reified T : Any> lookup(default: T) =
 /**
  * Allows you to register a factory for a type
  */
-inline fun <reified T : Any> register(crossinline factory: () -> T) = Instances.registerFactory(T::class) { factory() }
-
-/**
- * Allows you to register an instance for a type
- */
-inline fun <reified T : Any> register(instance: T) = Instances.registerFactory(T::class) { instance }
+inline fun <reified T : Any> register(noinline factory: () -> T) = Instances.registerFactory(T::class, factory)

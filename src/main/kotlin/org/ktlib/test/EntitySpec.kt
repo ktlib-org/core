@@ -20,7 +20,7 @@ abstract class EntitySpec(body: EntitySpec.() -> Unit = {}) : DslDrivenSpec(), S
 
         if (!Instances.isRegistered(Repository::class)) {
             @Suppress("UNCHECKED_CAST")
-            Instances.registerResolver(Repository::class) { RepositoryTypeFactory(it as KClass<Repository<*>>) }
+            Instances.registerResolver(Repository::class) { createRepositoryTypeFactory(it as KClass<Repository<*>>) }
         }
 
         beforeEach {
