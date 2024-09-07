@@ -20,9 +20,8 @@ repositories {
 plugins {
     `java-library`
     `maven-publish`
+    kotlin("jvm") version "2.0.20"
 }
-
-apply(plugin = "kotlin")
 
 dependencies {
     val kotlinVersion: String by project
@@ -31,35 +30,33 @@ dependencies {
 
     compileOnly(gradleApi())
 
-    implementation("ch.qos.logback:logback-classic:1.4.5")
+    implementation("ch.qos.logback:logback-classic:1.5.7")
     implementation("ch.qos.logback.contrib:logback-json-classic:0.1.5")
     implementation("ch.qos.logback.contrib:logback-jackson:0.1.5")
-    implementation("io.github.oshai:kotlin-logging-jvm:5.1.0")
-    implementation("org.yaml:snakeyaml:2.0")
+    implementation("io.github.oshai:kotlin-logging-jvm:7.0.0")
+    implementation("org.yaml:snakeyaml:2.3")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-    implementation("com.squareup.okhttp3:okhttp:4.10.0")
-    implementation("org.springframework.security:spring-security-crypto:6.0.2")
-    implementation("com.github.f4b6a3:uuid-creator:5.3.5")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("org.springframework.security:spring-security-crypto:6.3.3")
+    implementation("com.github.f4b6a3:uuid-creator:6.0.0")
 
     compileOnly("io.kotest:kotest-runner-junit5:$kotestVersion")
-    compileOnly("io.mockk:mockk:1.13.4")
-    compileOnly("io.sentry:sentry-servlet:6.16.0")
-    compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
+    compileOnly("io.mockk:mockk:1.13.12")
+    compileOnly("io.sentry:sentry-servlet:7.14.0")
+    compileOnly("jakarta.servlet:jakarta.servlet-api:6.1.0")
 
     testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
     testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
-    testImplementation("io.mockk:mockk:1.12.7")
+    testImplementation("io.mockk:mockk:1.13.12")
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+kotlin {
+    jvmToolchain(17)
 }
 
 val test by tasks.getting(Test::class) {

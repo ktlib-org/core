@@ -1,6 +1,6 @@
 package org.ktlib.files
 
-import org.ktlib.lookup
+import org.ktlib.lookupInstance
 import java.io.InputStream
 import java.nio.file.Path
 import java.time.Duration
@@ -12,7 +12,7 @@ data class FileInfo(val contentType: String, val contentLength: Long, val inputS
  * Interface defining basic interaction with a file storage system.
  */
 interface FileStorage {
-    companion object : FileStorage by lookup()
+    companion object : FileStorage by lookupInstance()
 
     fun save(basePath: String, path: String, content: String)
     fun save(basePath: String, path: String, localPath: Path)

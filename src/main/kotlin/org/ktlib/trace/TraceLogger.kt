@@ -1,13 +1,13 @@
 package org.ktlib.trace
 
-import org.ktlib.lookup
+import org.ktlib.lookupInstance
 import java.time.LocalDateTime
 
 /**
  * Interface for logging trace data
  */
 interface TraceLogger {
-    companion object : TraceLogger by lookup(ConsoleLogger)
+    companion object : TraceLogger by lookupInstance(default = ConsoleLogger)
 
     /**
      * @param trace The trace data that should be logged

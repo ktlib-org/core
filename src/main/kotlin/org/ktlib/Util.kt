@@ -76,9 +76,9 @@ fun String.toUUID(): UUID =
         UUID.fromString(this)
     }
 
-fun newUUID7() = UuidCreator.getTimeOrderedEpoch()
+fun newUUID7(): UUID = UuidCreator.getTimeOrderedEpoch()
 
-fun newUUID4() = UuidCreator.getRandomBasedFast()
+fun newUUID4(): UUID = UuidCreator.getRandomBasedFast()
 
 fun UUID.toHexString(): String = Base16Codec.INSTANCE.encode(this)
 
@@ -97,10 +97,10 @@ fun ByteArray.ungzip(): ByteArray =
     GZIPInputStream(this.inputStream()).use { it.readBytes() }
 
 // Date Functions
-fun now() = LocalDateTime.now()
-fun now(zone: ZoneId) = LocalDateTime.now(zone)
-fun today() = LocalDate.now()
-fun today(zone: ZoneId) = LocalDate.now(zone)
+fun now(): LocalDateTime = LocalDateTime.now()
+fun now(zone: ZoneId): ZonedDateTime = ZonedDateTime.now(zone)
+fun today(): LocalDate = LocalDate.now()
+fun today(zone: ZoneId): LocalDate = LocalDate.now(zone)
 fun nowMillis() = System.currentTimeMillis()
 
 fun Int.minutesAgo(): LocalDateTime = now().minusMinutes(this.toLong())

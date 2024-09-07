@@ -1,8 +1,6 @@
 package org.ktlib
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.ktlib.entities.Entity
-import org.ktlib.entities.Repository
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -27,11 +25,7 @@ internal object InstancesImpl : Instances {
     }
 
     override fun registerFactory(type: KClass<*>, factory: TypeFactory) {
-        doRegister(type, factory)
-    }
-
-    private fun doRegister(type: KClass<*>, factory: TypeFactory) {
-        logger.debug { "Registering factory ${typeName(factory::class.qualifiedName)}for interface ${type.qualifiedName}" }
+        logger.debug { "Registering factory ${typeName(factory::class.qualifiedName)} for interface ${type.qualifiedName}" }
         typeFactories[type] = factory
     }
 
@@ -42,7 +36,7 @@ internal object InstancesImpl : Instances {
     }
 
     override fun registerResolver(type: KClass<*>, resolver: FactoryResolver) {
-        logger.debug { "Registering resolver ${typeName(resolver::class.qualifiedName)}for interface ${type.qualifiedName}" }
+        logger.debug { "Registering resolver ${typeName(resolver::class.qualifiedName)} for interface ${type.qualifiedName}" }
         factoryResolvers[type] = resolver
     }
 
@@ -71,8 +65,6 @@ internal object InstancesImpl : Instances {
                 var message = "No factory found when trying to invoke ${type.qualifiedName}.${method?.name}()"
                 if (e.stackTraceToString().contains("io.mockk.")) {
                     message += ".\nThis might be because you forgot to mock the '${method?.name}' method!"
-                } else if (e.type.isSubclassOf(Repository::class) || e.type.isSubclassOf(Entity::class)) {
-                    message += ".\nHave you initialized the Entity classes by calling EntityInitializer.init()?"
                 }
                 throw NoInstanceException(e.type, message)
             }

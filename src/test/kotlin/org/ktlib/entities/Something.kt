@@ -3,7 +3,7 @@ package org.ktlib.entities
 import org.ktlib.entities.Validation.field
 import org.ktlib.entities.Validation.notBlank
 import org.ktlib.entities.Validation.validate
-import org.ktlib.lookup
+import org.ktlib.lookupInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -41,7 +41,7 @@ data class SomethingInfo(
     var long: Long?
 )
 
-object Somethings : SomethingRepository by lookup()
+object Somethings : SomethingRepository by lookupInstance()
 
 interface SomethingRepository : Repository<Something> {
     fun findByLotsOfThings(name: String, count: Int, date: LocalDateTime): List<Something>

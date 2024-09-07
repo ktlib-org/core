@@ -63,6 +63,6 @@ object LocalFileStorage : FileStorage {
     }
 
     override fun createUrl(basePath: String, path: String, method: FileMethod, validFor: Duration): String {
-        throw Exception("Cannot get file url for local storage")
+        throw UnsupportedOperationException("Cannot get file url for local storage")
     }
 }

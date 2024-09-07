@@ -20,10 +20,10 @@ class NoInstanceException(val type: KClass<*>, message: String? = null) :
 
 /**
  * This interface defines a basic service locator. It is not intended to be a full-featured DI container.
- * It is used to provide a simple way to lookup implementations of interfaces when they are needed
+ * It is used to provide a simple way to lookup implementations of interfaces when they are needed.
  */
 interface Instances {
-    companion object : Instances by config("instancesImplementation", InstancesImpl)
+    companion object : Instances by config(key = "instancesImplementation", default = InstancesImpl)
 
     /**
      * Returns a new instance for the given type.
@@ -57,17 +57,18 @@ interface Instances {
 }
 
 /**
- * Returns a new instance for the given type.
+ * Returns an instance for the given type.
  */
-inline fun <reified T : Any> lookup() = Instances.instance(T::class)
+inline fun <reified T : Any> lookupInstance() = Instances.instance(T::class)
 
 /**
  * Returns a new instance for the given type or the default value if no instance is registered for the given type.
  */
-inline fun <reified T : Any> lookup(default: T) =
+inline fun <reified T : Any> lookupInstance(default: T) =
     if (Instances.isRegistered(T::class)) Instances.instance(T::class) else default
 
 /**
  * Allows you to register a factory for a type
  */
-inline fun <reified T : Any> register(noinline factory: () -> T) = Instances.registerFactory(T::class, factory)
+inline fun <reified T : Any> registerInstanceFactory(noinline factory: () -> T) =
+    Instances.registerFactory(T::class, factory)

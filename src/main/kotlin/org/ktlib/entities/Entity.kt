@@ -1,6 +1,6 @@
 package org.ktlib.entities
 
-import org.ktlib.lookup
+import org.ktlib.lookupInstance
 import org.ktlib.toUUID
 import org.ktlib.typeArguments
 import java.io.Closeable
@@ -195,13 +195,13 @@ abstract class Factory<E : Entity> {
 }
 
 interface EntityCreator {
-    companion object : EntityCreator by lookup<EntityCreator>(EntityImplCreator)
+    companion object : EntityCreator by lookupInstance(default = EntityImplCreator)
 
     fun <T : Any> create(type: KClass<T>): T
 }
 
 interface TransactionManager : Closeable {
-    companion object : TransactionManager by lookup<TransactionManager>(EmptyTransactionManager)
+    companion object : TransactionManager by lookupInstance(default = EmptyTransactionManager)
 
     fun <T> runInTransaction(func: () -> T): T
     fun startTransaction()
