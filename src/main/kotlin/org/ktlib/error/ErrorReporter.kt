@@ -6,7 +6,7 @@ import org.ktlib.lookupInstance
  * Interface that defines an error reporter.
  */
 interface ErrorReporter {
-    companion object : ErrorReporter by lookupInstance(ConsoleErrorReporter)
+    companion object : ErrorReporter by lookupInstance<ErrorReporter>(ConsoleErrorReporter)
 
     fun report(t: Throwable, additionalInfo: Map<String, Any>? = null)
     fun report(message: String, additionalInfo: Map<String, Any>? = null)

@@ -7,7 +7,7 @@ import java.time.LocalDateTime
  * Interface for logging trace data
  */
 interface TraceLogger {
-    companion object : TraceLogger by lookupInstance(default = ConsoleLogger)
+    companion object : TraceLogger by lookupInstance<TraceLogger>(default = ConsoleLogger)
 
     /**
      * @param trace The trace data that should be logged

@@ -195,13 +195,13 @@ abstract class Factory<E : Entity> {
 }
 
 interface EntityCreator {
-    companion object : EntityCreator by lookupInstance(default = EntityImplCreator)
+    companion object : EntityCreator by lookupInstance<EntityCreator>(default = EntityImplCreator)
 
     fun <T : Any> create(type: KClass<T>): T
 }
 
 interface TransactionManager : Closeable {
-    companion object : TransactionManager by lookupInstance(default = EmptyTransactionManager)
+    companion object : TransactionManager by lookupInstance<TransactionManager>(default = EmptyTransactionManager)
 
     fun <T> runInTransaction(func: () -> T): T
     fun startTransaction()

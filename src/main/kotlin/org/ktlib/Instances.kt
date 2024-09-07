@@ -42,7 +42,7 @@ interface Instances {
      * @return a new instance of the given type
      */
     @Throws(NoInstanceException::class)
-    fun <T : Any> instance(type: KClass<T>, default: T): T
+    fun <T : Any, D : T> instance(type: KClass<T>, default: D): T
 
     /**
      * Returns true if a factory has been registered for the given type
@@ -74,10 +74,25 @@ inline fun <reified T : Any> lookupInstance() = Instances.instance(T::class)
 /**
  * Returns a new instance for the given type or the default value if no instance is registered for the given type.
  */
-inline fun <reified T : Any, D : T> lookupInstance(default: D) = Instances.instance(T::class, default)
+inline fun <reified T : Any> lookupInstance(default: T): T {
+    if (!T::class.java.isInterface) {
+        throw Exception(
+            "Lookup type is not an interface, this might be because you didn't invoke this function with " +
+                    "the interface type in the function call like lookupInstance<MyInterface>(MyDefaultInstance)"
+        )
+    }
+    return Instances.instance(T::class, default)
+}
 
 /**
  * Allows you to register a factory for a type
  */
-inline fun <reified T : Any> registerInstanceFactory(noinline factory: () -> T) =
+inline fun <reified T : Any> registerInstanceFactory(noinline factory: () -> T) {
+    if (!T::class.java.isInterface) {
+        throw Exception(
+            "Registration type is not an interface, this might be because you didn't invoke this function with " +
+                    "the interface type in the function call like registerInstanceFactory<MyInterface> { }"
+        )
+    }
     Instances.registerFactory(T::class, factory)
+}
