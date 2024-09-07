@@ -74,7 +74,7 @@ inline fun <reified T : Any> lookupInstance() = Instances.instance(T::class)
 /**
  * Returns a new instance for the given type or the default value if no instance is registered for the given type.
  */
-inline fun <reified T : Any> lookupInstance(default: T) = Instances.instance(T::class, default)
+inline fun <reified T : Any, D : T> lookupInstance(default: D) = Instances.instance(T::class, default)
 
 /**
  * Allows you to register a factory for a type
