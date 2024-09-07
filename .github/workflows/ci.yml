@@ -56,7 +56,7 @@ jobs:
         if: success()
         run: |
           module=core
-          url=https://jitpack.io/com/github/ktlib-org/$module/${{ steps.tag_version.outputs.new_tag }}/$module-${{ steps.tag_version.outputs.new_tag }}.pom"
+          url="https://jitpack.io/com/github/ktlib-org/$module/${{ steps.tag_version.outputs.new_tag }}/$module-${{ steps.tag_version.outputs.new_tag }}.pom"
           maxRetries=20
           retryCount=0
 
