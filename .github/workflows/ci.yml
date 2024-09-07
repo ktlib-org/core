@@ -59,12 +59,11 @@ jobs:
           module=$(basename ${{ github.repository }})
           version=${{ steps.tag_version.outputs.new_tag }}
           url="https://jitpack.io/com/github/$repo/$version/$module-$version.pom"
-          maxRetries=20
+          maxRetries=25
           retryWait=10
           retryCount=0
           
           echo "Looking for build at $url"
-          sleep 30
           
           while [ $retryCount -le $maxRetries ]; do
             response=$(curl --write-out "%{http_code}" --silent --output /dev/null $url)
