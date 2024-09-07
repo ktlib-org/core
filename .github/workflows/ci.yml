@@ -55,23 +55,28 @@ jobs:
       - name: Start Jitpack Build
         if: success()
         run: |
-          module=core
-          url="https://jitpack.io/com/github/ktlib-org/$module/${{ steps.tag_version.outputs.new_tag }}/$module-${{ steps.tag_version.outputs.new_tag }}.pom"
+          repo=${{ github.repository }}
+          module=$(basename ${{ github.repository }})
+          version=${{ steps.tag_version.outputs.new_tag }}
+          url="https://jitpack.io/com/github/$repo/$version/$module-$version.pom"
           maxRetries=20
+          retryWait=10
           retryCount=0
-
+          
+          echo "Looking for build at $url"
+          
           while [ $retryCount -le $maxRetries ]; do
             response=$(curl --write-out "%{http_code}" --silent --output /dev/null $url)
-
+          
             if [ $response -eq 200 ]; then
               echo "Found build in JitPack!"
               exit 0
             else
-              echo "Retrying... Attempt: $((retryCount+1))"
+              echo "Retry $((retryCount+1))..."
               retryCount=$((retryCount+1))
-              sleep 10
+              sleep $retryWait
             fi
           done
-
+          
           echo "Could not find build in JitPack"
           exit 1
