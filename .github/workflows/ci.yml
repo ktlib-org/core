@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   build:
-    name: Build and create new version
+    name: Test and build new version
     runs-on: ubuntu-latest
 
     steps:
@@ -52,11 +52,26 @@ jobs:
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
 
-      - name: Wait for tag to propagate
-        if: success()
-        run: sleep 15
-
       - name: Start Jitpack Build
         if: success()
         run: |
-          curl -X GET 'https://jitpack.io/com/github/ktlib-org/core/${{ steps.tag_version.outputs.new_tag }}/core-${{ steps.tag_version.outputs.new_tag }}.pom'
+          module=core
+          url=https://jitpack.io/com/github/ktlib-org/$module/${{ steps.tag_version.outputs.new_tag }}/$module-${{ steps.tag_version.outputs.new_tag }}.pom"
+          maxRetries=20
+          retryCount=0
+
+          while [ $retryCount -le $maxRetries ]; do
+            response=$(curl --write-out "%{http_code}" --silent --output /dev/null $url)
+
+            if [ $response -eq 200 ]; then
+              echo "Found build in JitPack!"
+              exit 0
+            else
+              echo "Retrying... Attempt: $((retryCount+1))"
+              retryCount=$((retryCount+1))
+              sleep 10
+            fi
+          done
+
+          echo "Could not find build in JitPack"
+          exit 1
