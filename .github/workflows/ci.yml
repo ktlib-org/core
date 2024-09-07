@@ -63,6 +63,7 @@ jobs:
           retryWait=10
           retryCount=0
           
+          sleep 30
           echo "Looking for build at $url"
           
           while [ $retryCount -le $maxRetries ]; do

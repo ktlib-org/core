@@ -3,7 +3,6 @@ package org.ktlib
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import java.util.*
 
 
 class UtilTests : StringSpec({
@@ -64,18 +63,5 @@ class UtilTests : StringSpec({
         val bytes = "hello".toByteArray()
 
         bytes.gzip().ungzip() shouldBe bytes
-    }
-
-    "something" {
-        val f = { uuid: UUID ->
-            println(uuid.toHexString())
-            println(Base64.getUrlEncoder().encodeToString(uuid.toHexString().decodeHex()).substringBefore("=="))
-        }
-        f(UUID.randomUUID())
-        f(UUID.randomUUID())
-        f(UUID.randomUUID())
-        f(UUID.randomUUID())
-        f(UUID.randomUUID())
-        f(UUID.randomUUID())
     }
 })
