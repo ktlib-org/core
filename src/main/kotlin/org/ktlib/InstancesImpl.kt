@@ -25,7 +25,7 @@ internal object InstancesImpl : Instances {
     }
 
     override fun registerFactory(type: KClass<*>, factory: TypeFactory) {
-        logger.debug { "Registering factory ${typeName(factory::class.qualifiedName)} for interface ${type.qualifiedName}" }
+        logger.debug { "Registering factory ${typeName(factory::class.qualifiedName)}for interface ${type.qualifiedName}" }
         typeFactories[type] = factory
     }
 
@@ -36,16 +36,15 @@ internal object InstancesImpl : Instances {
     }
 
     override fun registerResolver(type: KClass<*>, resolver: FactoryResolver) {
-        logger.debug { "Registering resolver ${typeName(resolver::class.qualifiedName)} for interface ${type.qualifiedName}" }
+        logger.debug { "Registering resolver ${typeName(resolver::class.qualifiedName)}for interface ${type.qualifiedName}" }
         factoryResolvers[type] = resolver
     }
 
     override fun <T : Any> instance(type: KClass<T>): T {
-        logger.debug { "Returning implementation for $type" }
-
         return if (isRegistered(type)) {
             getInstance(type)
         } else {
+            logger.debug { "Returning proxy implementation for $type since it's not registered yet" }
             // This will allow injection of interfaces that are not registered yet.
             // It will resolve the instance once it's actually needed, and fail then if one isn't registered.
             @Suppress("UNCHECKED_CAST")
@@ -77,6 +76,8 @@ internal object InstancesImpl : Instances {
             throw NoInstanceException(type)
         }
         val factory = typeFactories[type] ?: findResolver(type)!!(type)
-        return factory() as T
+        val instance = factory() as T
+        logger.debug { "Returning instance ${instance::class.qualifiedName} for type ${type.qualifiedName}" }
+        return instance
     }
 }

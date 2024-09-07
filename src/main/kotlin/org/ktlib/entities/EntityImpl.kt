@@ -1,5 +1,6 @@
 package org.ktlib.entities
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.ktlib.TypeFactory
 import org.ktlib.newUUID7
 import org.ktlib.now
@@ -27,7 +28,9 @@ interface EntityMarker {
 
 internal class EntityImpl(private val type: KClass<*>, private val data: MutableMap<String, Any?> = mutableMapOf()) :
     InvocationHandler {
+
     companion object {
+        private val logger = KotlinLogging.logger {}
         private val methodResolution = Collections.synchronizedMap(WeakHashMap<Method, Method>())
 
         fun <T : Any> create(type: KClass<T>, data: Map<String, Any?> = mapOf()) = createProxy(type, data)
@@ -39,6 +42,7 @@ internal class EntityImpl(private val type: KClass<*>, private val data: Mutable
             if (!mutableData.containsKey("id")) {
                 mutableData["id"] = newUUID7()
             }
+            logger.debug { "Creating proxy instance for Entity ${type.simpleName}" }
             return Proxy.newProxyInstance(type.java.classLoader, types, EntityImpl(type, mutableData)) as T
         }
     }
