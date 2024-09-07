@@ -64,6 +64,7 @@ jobs:
           retryCount=0
           
           echo "Looking for build at $url"
+          sleep 30
           
           while [ $retryCount -le $maxRetries ]; do
             response=$(curl --write-out "%{http_code}" --silent --output /dev/null $url)
