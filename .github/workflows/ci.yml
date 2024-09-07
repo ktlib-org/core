@@ -19,17 +19,41 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
+
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+
       - name: Run Tests
         uses: gradle/gradle-build-action@937999e9cc2425eddc7fd62d1053baf041147db7
         with:
           arguments: test
 
       - name: Test Report
-        uses: dorny/test-reporter@v1
         if: success() || failure()
+        uses: dorny/test-reporter@v1
         with:
           name: Unit Test Results
           path: build/test-results/**/*.xml
           reporter: java-junit
+
+      - name: Bump version and push tag
+        id: tag_version
+        if: success()
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_prefix: ''
+
+      - name: Create a GitHub release
+        if: success()
+        uses: ncipollo/release-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+
+      - name: Start Jitpack Build
+        if: success()
+        run: |
+          curl -X GET 'https://jitpack.io/com/github/ktlib-org/core/${{ steps.tag_version.outputs.new_tag }}/core-${{ steps.tag_version.outputs.new_tag }}.pom'
