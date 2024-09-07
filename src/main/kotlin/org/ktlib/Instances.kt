@@ -35,6 +35,16 @@ interface Instances {
     fun <T : Any> instance(type: KClass<T>): T
 
     /**
+     * Returns a new instance for the given type.
+     * @throws NoInstanceException if no instance is registered for the given type
+     * @param type the type to lookup
+     * @param default the default instance to return if one has not been registered
+     * @return a new instance of the given type
+     */
+    @Throws(NoInstanceException::class)
+    fun <T : Any> instance(type: KClass<T>, default: T): T
+
+    /**
      * Returns true if a factory has been registered for the given type
      * @param type the type to lookup
      * @return true if a factory has been registered for the given type
@@ -64,8 +74,7 @@ inline fun <reified T : Any> lookupInstance() = Instances.instance(T::class)
 /**
  * Returns a new instance for the given type or the default value if no instance is registered for the given type.
  */
-inline fun <reified T : Any> lookupInstance(default: T) =
-    if (Instances.isRegistered(T::class)) Instances.instance(T::class) else default
+inline fun <reified T : Any> lookupInstance(default: T) = Instances.instance(T::class, default)
 
 /**
  * Allows you to register a factory for a type

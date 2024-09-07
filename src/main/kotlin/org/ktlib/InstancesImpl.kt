@@ -46,4 +46,13 @@ internal object InstancesImpl : Instances {
         logger.debug { "Returning instance ${instance::class.qualifiedName} for type ${type.qualifiedName}" }
         return instance
     }
+
+    override fun <T : Any> instance(type: KClass<T>, default: T): T {
+        return if (isRegistered(type::class)) {
+            instance(type)
+        } else {
+            logger.debug { "No instance of ${type.qualifiedName} found, returning default instance ${default::class.qualifiedName}" }
+            default
+        }
+    }
 }
