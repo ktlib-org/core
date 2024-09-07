@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   build:
-    name: Unit Tests
+    name: Build and create new version
     runs-on: ubuntu-latest
 
     steps:
@@ -48,7 +48,6 @@ jobs:
         if: success()
         uses: ncipollo/release-action@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
