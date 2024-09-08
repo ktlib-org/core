@@ -6,6 +6,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.ktlib.trace.Trace
 import java.io.File
 import java.io.IOException
 
@@ -97,6 +98,8 @@ fun String.httpDownload(dir: File, headers: Headers = mapOf()): File = Http.down
  * Object for doing basic HTTP requests. It assumes you'll be sending and receiving JSON.
  */
 object Http {
+    const val TRACE_NAME_HEADER = "trace-name"
+    private val debugBody = config<Boolean>("http.debugBody", false)
     private val client = OkHttpClient()
     private val formMediaType = "application/x-www-form-urlencoded".toMediaType()
     private val jsonMediaType = "application/json".toMediaType()
@@ -172,41 +175,52 @@ object Http {
         headers: Headers,
         mediaType: MediaType
     ): Response<String> {
-        logger.info { "Sending request to: $url" }
-        logger.debug {
-            """
+        try {
+            val domain = url.substringAfter("://").substringBefore("/")
+            val traceName = headers[TRACE_NAME_HEADER] ?: domain
+            Trace.start(
+                "HTTP",
+                traceName,
+                mapOf(Pair("method", method), Pair("url", url.substringBeforeLast("?")), Pair("domain", domain))
+            )
+            logger.info { "Sending request to: $url" }
+            logger.debug {
+                """
             HttpRequest {
                 Url: $url
                 Method: $method
                 Media: $mediaType
-                Body: ${truncate(body ?: "")}
+                Body: ${processBody(body ?: "")}
             }
         """.trimIndent()
-        }
+            }
 
-        val request = requestBuilder(url, method, headers, body, mediaType)
+            val request = requestBuilder(url, method, headers, body, mediaType)
 
-        return client.newCall(request).execute().use { response ->
-            val responseBody = response.body?.string() ?: ""
+            return client.newCall(request).execute().use { response ->
+                val responseBody = response.body?.string() ?: ""
 
-            logger.info { "Got response from $url with code ${response.code}" }
-            logger.debug {
-                """
+                logger.info { "Got response from $url with code ${response.code}" }
+                logger.debug {
+                    """
                 HttpResponse {
                     Url: $url
                     Media: ${response.headers["content-type"]}
                     Headers: ${response.headers.toMultimap()}
                     Status: ${response.code}
-                    Body: ${truncate(responseBody)}
+                    Body: ${processBody(responseBody)}
                 }
             """.trimIndent()
-            }
+                }
 
-            if (response.isSuccessful) {
-                Response(responseBody, response.headers.toMultimap())
-            } else {
-                throw IOException("Http request failed to $url with error code ${response.code} and response body $responseBody")
+                if (response.isSuccessful) {
+                    Response(responseBody, response.headers.toMultimap())
+                } else {
+                    throw IOException("Http request failed to $url with error code ${response.code} and response body $responseBody")
+                }
             }
+        } finally {
+            Trace.end()
         }
     }
 
@@ -218,9 +232,17 @@ object Http {
         mediaType: MediaType? = null
     ): Request {
         val builder = Request.Builder().url(url).method(method, body?.toRequestBody(mediaType))
-        headers.forEach { (key, value) -> builder.addHeader(key, value) }
+        headers.forEach { (key, value) ->
+            if (key != TRACE_NAME_HEADER) {
+                builder.addHeader(key, value)
+            }
+        }
         return builder.build()
     }
 
-    private fun truncate(value: String) = if (value.length > maxCharsToLog) "${value.take(maxCharsToLog)}..." else value
+    private fun processBody(value: String): String {
+        return if (!debugBody) "<removed>"
+        else if (value.length > maxCharsToLog) "${value.take(maxCharsToLog)}..."
+        else value
+    }
 }

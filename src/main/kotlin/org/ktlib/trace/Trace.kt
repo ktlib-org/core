@@ -1,28 +1,39 @@
 package org.ktlib.trace
 
-import org.ktlib.now
+import org.ktlib.newUUID4
 import org.ktlib.nowMillis
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 
 /**
  * Collects data for a trace statement.
  */
 class TraceData(
+    val id: UUID = newUUID4(),
+    val sessionId: UUID?,
+    val parentId: UUID?,
+    val correlationId: UUID,
     var dbTime: Long = 0,
     var dbRequests: Int = 0,
-    var duration: Long = 0,
     val extra: MutableMap<String, Any?>,
     var name: String,
     val start: Long = nowMillis(),
-    val startTime: LocalDateTime = now(),
+    var end: Long = start,
     val traceType: String,
 ) {
+    val duration: Long
+        get() = start - end
+
+    val startTime: LocalDateTime
+        get() = LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.systemDefault())
+
     fun end(extra: Map<String, Any?>? = null) {
         if (extra != null) {
             this.extra.putAll(extra)
         }
-        duration = nowMillis() - start
+        end = nowMillis()
     }
 
     fun addDbTime(time: Long) {
@@ -31,7 +42,7 @@ class TraceData(
     }
 
     override fun toString(): String {
-        return "TraceData(traceType='$traceType, name='$name', startTime=$startTime, duration=$duration, dbTime=$dbTime, dbRequests=$dbRequests, extra=$extra')"
+        return "TraceData(sessionId='$sessionId', correlationId='$correlationId', parentId='$parentId', id='$id', traceType='$traceType, name='$name', start=$start, end=$end, dbTime=$dbTime, dbRequests=$dbRequests, extra=$extra')"
     }
 }
 
@@ -40,6 +51,7 @@ class TraceData(
  */
 object Trace {
     private val threadLocal = ThreadLocal<Stack<TraceData>?>()
+    private val sessionId = ThreadLocal<UUID>()
 
     private val stack: Stack<TraceData>
         get() = threadLocal.get() ?: Stack<TraceData>().apply { threadLocal.set(this) }
@@ -56,12 +68,24 @@ object Trace {
         clear()
     }
 
+    fun sessionId(id: UUID) {
+        sessionId.set(id)
+    }
+
     fun clear() {
+        sessionId.set(null)
         threadLocal.set(Stack())
     }
 
     fun start(type: String, name: String, extra: Map<String, Any?> = mapOf()) {
-        this.current = TraceData(traceType = type, name = name, extra = extra.toMutableMap())
+        this.current = TraceData(
+            sessionId = this.current?.sessionId ?: this.sessionId.get(),
+            correlationId = this.current?.correlationId ?: newUUID4(),
+            parentId = this.current?.id,
+            traceType = type,
+            name = name,
+            extra = extra.toMutableMap()
+        )
     }
 
     fun extra(key: String, value: Any?) {

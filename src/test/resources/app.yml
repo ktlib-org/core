@@ -1,6 +1,9 @@
 applicationName: testing
 bootstrap: org.ktlib.BootstrapImpl
 
+http:
+  debugBody: true
+
 anInt: 5
 aString: "string value here"
 aLong: 4904509409509458
