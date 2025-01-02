@@ -1,115 +1,72 @@
 package org.ktlib.trace
 
-import org.ktlib.newUUID4
-import org.ktlib.nowMillis
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.util.*
+import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.api.trace.StatusCode
+import io.opentelemetry.api.trace.Tracer
+import io.opentelemetry.sdk.resources.Resource
+import io.opentelemetry.semconv.ServiceAttributes
+import org.ktlib.Environment
+import org.ktlib.config
+
 
 /**
- * Collects data for a trace statement.
+ * Object that wraps OpenTelemetry to make creating, starting, and stopping spans a little easier.
  */
-class TraceData(
-    val id: UUID = newUUID4(),
-    val sessionId: UUID?,
-    val parentId: UUID?,
-    val correlationId: UUID,
-    var dbTime: Long = 0,
-    var dbRequests: Int = 0,
-    val extra: MutableMap<String, Any?>,
-    var name: String,
-    val start: Long = nowMillis(),
-    var end: Long = start,
-    val traceType: String,
-) {
-    val duration: Long
-        get() = start - end
+object Trace {
+    private val appName = config("applicationName", "MyApplication")
+    private val openTelemetry: OpenTelemetry by lazy {
+        val resource = Resource.getDefault().toBuilder()
+            .put(ServiceAttributes.SERVICE_NAME, appName)
+            .put(ServiceAttributes.SERVICE_VERSION, Environment.version ?: "Unknown")
+            .build()
+        config<TraceSupplier>("traceSupplier", ConsoleTrace).supply(resource)
+    }
 
-    val startTime: LocalDateTime
-        get() = LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.systemDefault())
+    private val tracer: Tracer
+        get() = openTelemetry.getTracer(appName)
+
+    fun start(name: String, attributes: Map<String, Any?> = mapOf()) {
+        tracer.spanBuilder(name).startSpan().setAttributes(attributes).makeCurrent()
+    }
+
+    fun updateName(name: String) {
+        Span.current().updateName(name)
+    }
+
+    private fun Span.setAttribute(name: String, value: Any?) = apply {
+        this.setAttribute(name, value?.toString() ?: "")
+    }
+
+    private fun Span.setAttributes(extra: Map<String, Any?>?) = apply {
+        extra?.entries?.forEach { this.setAttribute(it.key, it.value) }
+    }
+
+    fun attribute(key: String, value: Any?) {
+        Span.current().setAttribute(key, value)
+    }
+
+    fun buildAttributes(service: String, resource: String): MutableMap<String, Any?> {
+        return mutableMapOf(ServiceAttributes.SERVICE_NAME.key to service, "resource.name" to resource)
+    }
+
+    fun error(throwable: Throwable, status: String? = null) {
+        Span.current().setStatus(StatusCode.ERROR, status ?: "").recordException(throwable)
+    }
 
     fun end(extra: Map<String, Any?>? = null) {
-        if (extra != null) {
-            this.extra.putAll(extra)
-        }
-        end = nowMillis()
-    }
-
-    fun addDbTime(time: Long) {
-        dbRequests++
-        dbTime += time
-    }
-
-    override fun toString(): String {
-        return "TraceData(sessionId='$sessionId', correlationId='$correlationId', parentId='$parentId', id='$id', traceType='$traceType, name='$name', start=$start, end=$end, dbTime=$dbTime, dbRequests=$dbRequests, extra=$extra')"
+        Span.current().setAttributes(extra)
     }
 }
 
-/**
- * Object that allows you to start and stop a trace in the code.
- */
-object Trace {
-    private val threadLocal = ThreadLocal<Stack<TraceData>?>()
-    private val sessionId = ThreadLocal<UUID>()
-
-    private val stack: Stack<TraceData>
-        get() = threadLocal.get() ?: Stack<TraceData>().apply { threadLocal.set(this) }
-
-    private var current: TraceData?
-        get() = stack.lastOrNull()
-        private set(data) {
-            if (data != null) {
-                stack.push(data)
-            }
-        }
-
-    init {
-        clear()
-    }
-
-    fun sessionId(id: UUID) {
-        sessionId.set(id)
-    }
-
-    fun clear() {
-        sessionId.set(null)
-        threadLocal.set(Stack())
-    }
-
-    fun start(type: String, name: String, extra: Map<String, Any?> = mapOf()) {
-        this.current = TraceData(
-            sessionId = this.current?.sessionId ?: this.sessionId.get(),
-            correlationId = this.current?.correlationId ?: newUUID4(),
-            parentId = this.current?.id,
-            traceType = type,
-            name = name,
-            extra = extra.toMutableMap()
-        )
-    }
-
-    fun extra(key: String, value: Any?) {
-        this.current?.extra?.put(key, value)
-    }
-
-    fun addDbTime(time: Long) {
-        stack.forEach { it.addDbTime(time) }
-    }
-
-    fun end(extra: Map<String, Any?>? = null) {
-        if (stack.size > 1) doEnd(extra)
-    }
-
-    private fun doEnd(extra: Map<String, Any?>? = null) {
-        stack.pop().apply {
-            end(extra)
-            TraceLogger.log(this)
-        }
-    }
-
-    fun finish(name: String, extra: Map<String, Any?>? = null) {
-        while (stack.size > 1) end()
-        current?.name = name
-        doEnd(extra)
+fun <T> withTrace(name: String, extra: Map<String, Any?> = mapOf(), block: () -> T): T {
+    Trace.start(name, extra)
+    return try {
+        block()
+    } catch (t: Throwable) {
+        Trace.error(t)
+        throw t
+    } finally {
+        Trace.end()
     }
 }

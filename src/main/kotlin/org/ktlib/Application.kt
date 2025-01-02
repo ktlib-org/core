@@ -23,7 +23,7 @@ object Application {
         Environment.init()
         BootstrapRunner.init()
 
-        name = config("applicationName", "")
+        name = config("applicationName", "MyApplication")
     }
 
     operator fun invoke(init: () -> Any? = {}) {

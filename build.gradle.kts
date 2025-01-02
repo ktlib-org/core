@@ -44,6 +44,11 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.springframework.security:spring-security-crypto:6.3.3")
     implementation("com.github.f4b6a3:uuid-creator:6.0.0")
+    implementation(platform("io.opentelemetry:opentelemetry-bom:1.42.1"))
+    implementation("io.opentelemetry:opentelemetry-api")
+    implementation("io.opentelemetry:opentelemetry-sdk")
+    implementation("io.opentelemetry.semconv:opentelemetry-semconv:1.27.0-alpha")
+    implementation("io.opentelemetry:opentelemetry-exporter-logging")
 
     compileOnly("io.kotest:kotest-runner-junit5:$kotestVersion")
     compileOnly("io.mockk:mockk:1.13.12")
@@ -56,7 +61,7 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 val test by tasks.getting(Test::class) {

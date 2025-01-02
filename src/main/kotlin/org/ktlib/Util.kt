@@ -2,7 +2,6 @@ package org.ktlib
 
 import com.github.f4b6a3.uuid.UuidCreator
 import com.github.f4b6a3.uuid.codec.base.Base16Codec
-import org.ktlib.error.ErrorReporter
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.URLEncoder
@@ -127,51 +126,6 @@ fun LocalDateTime.toStartOfMinute(): LocalDateTime = LocalDateTime.of(year, mont
 fun LocalDateTime.toStartOfHour(): LocalDateTime = LocalDateTime.of(year, month, dayOfMonth, hour, 0)
 fun LocalDateTime.toStartOfDay(): LocalDateTime = LocalDateTime.of(year, month, dayOfMonth, 0, 0)
 fun LocalDateTime.toStartOfMonth(): LocalDateTime = LocalDateTime.of(year, month, 1, 0, 0)
-
-
-// Error reporting
-
-/**
- * Catches any Throwable that comes out of the block and sends it to the ErrorReporter, then rethrows the Throwable
- *
- * @param block the block of code to execute
- */
-fun <T> reportAndThrow(block: () -> T?): T? = reportAndThrow({ null }, block)
-
-/**
- * Catches any Throwable that comes out of the block and sends it to the ErrorReporter, then rethrows the Throwable
- *
- * @param addedInfo callback that can add info to send to the ErrorReporter
- * @param block the block of code to execute
- */
-fun <T> reportAndThrow(addedInfo: (t: Throwable) -> Map<String, Any>?, block: () -> T?) =
-    try {
-        block()
-    } catch (t: Throwable) {
-        ErrorReporter.report(t, addedInfo(t))
-        throw t
-    }
-
-/**
- * Catches any Throwable that comes out of the block and sends it to the ErrorReporter, then returns null
- *
- * @param block the block of code to execute
- */
-fun <T> reportAndSwallow(block: () -> T?): T? = reportAndSwallow({ null }, block)
-
-/**
- * Catches any Throwable that comes out of the block and sends it to the ErrorReporter, then returns null
- *
- * @param addedInfo callback that can add info to send to the ErrorReporter
- * @param block the block of code to execute
- */
-fun <T> reportAndSwallow(addedInfo: (t: Throwable) -> Map<String, Any>?, block: () -> T?) =
-    try {
-        block()
-    } catch (t: Throwable) {
-        ErrorReporter.report(t, addedInfo(t))
-        null
-    }
 
 /**
  * This function will find all the classes in the classpath that are in the same package or below

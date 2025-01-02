@@ -1,6 +1,5 @@
 package org.ktlib
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 
@@ -37,22 +36,6 @@ class UtilTests : StringSpec({
     "loading dir" {
         val resource = UtilTests::class.java.getResource("org/ktlib")
         println(resource)
-    }
-
-    "report and throw error" {
-        val exception = shouldThrow<Exception> {
-            reportAndThrow {
-                throw Exception("hello")
-            }
-        }
-
-        exception.message shouldBe "hello"
-    }
-
-    "report and swallow error" {
-        reportAndSwallow {
-            throw Exception("still passing test")
-        }
     }
 
     "zip string" {
