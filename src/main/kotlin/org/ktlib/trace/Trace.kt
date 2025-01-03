@@ -15,7 +15,7 @@ import org.ktlib.config
  */
 object Trace {
     private val appName = config("applicationName", "MyApplication")
-    private val openTelemetry: OpenTelemetry by lazy {
+    val openTelemetry: OpenTelemetry by lazy {
         val resource = Resource.getDefault().toBuilder()
             .put(ServiceAttributes.SERVICE_NAME, appName)
             .put(ServiceAttributes.SERVICE_VERSION, Environment.version ?: "Unknown")
